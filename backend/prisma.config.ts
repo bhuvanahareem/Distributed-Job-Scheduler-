@@ -2,8 +2,8 @@ import 'dotenv/config';
 import { defineConfig, env } from 'prisma/config';
 
 export default defineConfig({
-  schema: './backend/prisma/schema.prisma',
+  schema: './prisma/schema.prisma', // Relative to the backend folder
   datasource: {
-    url: env('DATABASE_URL'), // The official Prisma 7 native wrapper method
+    url: env('DATABASE_URL'),
   },
 });
