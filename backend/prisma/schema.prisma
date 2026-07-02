@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email         String         @unique @db.VarChar(255)
+  password_hash String
+  name          String         @db.VarChar(255)
+  org_id        String?        @db.Uuid
+  created_at    DateTime?      @default(now()) @db.Timestamptz(6)
+  organization  organizations? @relation(fields: [org_id], references: [id], onDelete: SetNull)
+}
+
+model organizations {
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String     @db.VarChar(255)
+  created_at DateTime?  @default(now()) @db.Timestamptz(6)
+  projects   projects[]
+  users      users[]
+}
+
+model projects {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  org_id       String?        @db.Uuid
+  name         String         @db.VarChar(255)
+  created_at   DateTime?      @default(now()) @db.Timestamptz(6)
+  organization organizations? @relation(fields: [org_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  queues       queues[]
+}
+
+model queues {
+  id                    String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  project_id            String?         @db.Uuid
+  name                  String          @db.VarChar(255)
+  priority              Int?            @default(1)
+  concurrency_limit     Int?            @default(5)
+  is_paused             Boolean?        @default(false)
+  retry_limit           Int?            @default(3)
+  backoff_strategy      retry_strategy? @default(EXPONENTIAL)
+  backoff_delay_seconds Int?            @default(5)
+  created_at            DateTime?       @default(now()) @db.Timestamptz(6)
+  jobs                  jobs[]
+  project               projects?       @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model workers {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  hostname          String           @db.VarChar(255)
+  last_heartbeat_at DateTime?        @default(now()) @db.Timestamptz(6)
+  status            worker_status?   @default(ACTIVE)
+  created_at        DateTime?        @default(now()) @db.Timestamptz(6)
+  job_executions    job_executions[]
+  jobs              jobs[]
+
+  @@index([last_heartbeat_at], map: "idx_workers_heartbeat")
+}
+
+model jobs {
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  queue_id        String?          @db.Uuid
+  worker_id       String?          @db.Uuid
+  status          job_status?      @default(QUEUED)
+  payload         Json
+  run_at          DateTime?        @default(now()) @db.Timestamptz(6)
+  cron_expression String?          @db.VarChar(100)
+  attempts_made   Int?             @default(0)
+  created_at      DateTime?        @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?        @default(now()) @db.Timestamptz(6)
+  job_executions  job_executions[]
+  job_logs        job_logs[]
+  queue           queues?          @relation(fields: [queue_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  worker          workers?         @relation(fields: [worker_id], references: [id], onUpdate: NoAction)
+
+  @@index([status, run_at, queue_id], map: "idx_jobs_polling")
+  @@index([queue_id], map: "idx_jobs_queue_id")
+}
+
+model job_executions {
+  id            String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  job_id        String?          @db.Uuid
+  worker_id     String?          @db.Uuid
+  status        execution_status
+  error_message String?
+  started_at    DateTime         @db.Timestamptz(6)
+  finished_at   DateTime         @db.Timestamptz(6)
+  duration_ms   Int
+  job           jobs?            @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  worker        workers?         @relation(fields: [worker_id], references: [id], onUpdate: NoAction)
+
+  @@index([job_id], map: "idx_executions_job_id")
+}
+
+model job_logs {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  job_id     String?   @db.Uuid
+  log_text   String
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  job        jobs?     @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+enum job_status {
+  QUEUED
+  SCHEDULED
+  CLAIMED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum retry_strategy {
+  FIXED
+  LINEAR
+  EXPONENTIAL
+}
+
+enum execution_status {
+  SUCCESS
+  FAILURE
+}
+
+enum worker_status {
+  ACTIVE
+  DEAD
+}
