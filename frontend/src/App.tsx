@@ -1,4 +1,5 @@
-import { useState, createContext, useContext, useEffect, ReactNode } from 'react';
+import { useState, createContext, useContext, useEffect } from 'react';
+import type { ReactNode } from 'react'; // Fixed type-only import
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout.js';
 import { Login } from './pages/Login.js';

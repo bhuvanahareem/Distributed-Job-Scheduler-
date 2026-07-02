@@ -1,4 +1,4 @@
-import { X, RefreshCw } from 'lucide-react';
+import { X, RefreshCw, Loader2 } from 'lucide-react'; 
 import { StatusBadge } from './StatusBadge.js';
 import { TerminalBlock } from './TerminalBlock.js';
 import { api } from '../lib/api.js';
