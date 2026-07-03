@@ -3,6 +3,8 @@ import { api } from '../lib/api.js';
 import { useAuth } from '../App.js';
 import { useNavigate } from 'react-router-dom';
 import { CheckSquare } from 'lucide-react';
+import { ParticleMesh } from '../components/ParticleMesh';
+import { ContouredLogo } from '../components/ContouredLogo';
 
 export function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -109,11 +111,23 @@ export function Login() {
       </div>
       
       {/* Premium visual right side */}
-      <div className="hidden lg:block relative w-0 flex-1 bg-[#050B1A]">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#004FE2]/20 to-transparent mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0wIDIwaDQwTTIwIDB2NDAiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9zdmc+')] opacity-20"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+      <div className="hidden lg:block relative w-0 flex-1 bg-[#050B1A] overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#004FE2]/20 to-transparent mix-blend-overlay z-0"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0wIDIwaDQwTTIwIDB2NDAiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9zdmc+')] opacity-20 z-0"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0">
           <div className="w-96 h-96 bg-primary rounded-full filter blur-[120px] opacity-40 animate-pulse"></div>
+        </div>
+        
+        {/* Interactive Particle Mesh Background */}
+        <ParticleMesh />
+        
+        {/* Contoured Logo centered over the mesh */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <ContouredLogo />
+          <h2 className="mt-8 text-2xl font-light text-white tracking-widest uppercase opacity-80">NEXUS Platform</h2>
+          <p className="mt-4 text-sm text-gray-400 max-w-md text-center opacity-70">
+            Distributed Job Network
+          </p>
         </div>
       </div>
     </div>
