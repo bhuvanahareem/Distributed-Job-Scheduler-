@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const ContouredLogo = () => {
   // Generate concentric array loops to match the wireframe topological mesh effect
   const contourLinesCount = 14; 
